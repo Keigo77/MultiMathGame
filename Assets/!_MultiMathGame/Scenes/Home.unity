@@ -558,6 +558,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _networkRunnerPrefab: {fileID: 5166648369363327445, guid: 70c1d6460910f459faac6ef3a6a3713e, type: 3}
   _roomNameInputField: {fileID: 1207033282}
+  _waitRoomSceneIndex: 1
 --- !u!4 &646744811
 Transform:
   m_ObjectHideFlags: 0
@@ -1559,7 +1560,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1584732611}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 646744810}
+        m_TargetAssemblyTypeName: GameLauncher, Assembly-CSharp
+        m_MethodName: RandomMatchButtonOnClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1584732611
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1811,7 +1824,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1815532374}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 646744810}
+        m_TargetAssemblyTypeName: GameLauncher, Assembly-CSharp
+        m_MethodName: PrivateMatchButtonOnClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1815532374
 MonoBehaviour:
   m_ObjectHideFlags: 0

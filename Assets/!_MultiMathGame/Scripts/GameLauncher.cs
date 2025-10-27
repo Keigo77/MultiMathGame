@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using Fusion;
+using Fusion.Sockets;
 using TMPro;
 using UnityEngine;
 
@@ -6,6 +9,12 @@ public class GameLauncher : MonoBehaviour
 {
     [SerializeField] private NetworkRunner _networkRunnerPrefab;
     [SerializeField] private TMP_InputField _roomNameInputField;
+    [SerializeField] private int _waitRoomSceneIndex;
+
+    void Awake()
+    {
+        Application.targetFrameRate = 60;
+    }
     
     public async void RandomMatchButtonOnClick()
     {
@@ -15,6 +24,7 @@ public class GameLauncher : MonoBehaviour
         var result = await networkRunner.StartGame(new StartGameArgs {
             GameMode = GameMode.Shared,
             PlayerCount = 4,
+            Scene = SceneRef.FromIndex(_waitRoomSceneIndex)
         });
         
         // 結果をコンソールに出力する
@@ -30,7 +40,8 @@ public class GameLauncher : MonoBehaviour
             GameMode = GameMode.Shared,
             SessionName = _roomNameInputField.text,
             PlayerCount = 4,
-            IsVisible = false
+            IsVisible = false,
+            Scene = SceneRef.FromIndex(_waitRoomSceneIndex)
         });
         
         // 結果をコンソールに出力する
