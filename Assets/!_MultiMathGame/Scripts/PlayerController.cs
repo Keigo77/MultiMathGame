@@ -24,6 +24,7 @@ public class PlayerController : NetworkBehaviour
         this.GetComponent<SpriteRenderer>().color = PlayerColor;
     }
     
+    // FixedUpdateNetworkだと，スペースキーが反応しないことがある．
     public override void Render()
     {
         bool isTouchingGround = Physics2D.CircleCast(transform.position, _castRadius, Vector2.down, _castDistance, LayerMask.GetMask("Ground"));
@@ -45,6 +46,11 @@ public class PlayerController : NetworkBehaviour
         else
         {
             _rigidbody.linearVelocityX = 0f;
+        }
+        if (Runner == null)
+        {
+            Debug.Log("Runner is null");
+            return;
         }
     }
     
