@@ -35,11 +35,14 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
         // SceneManager.LoadScene("Main");だと押した人しかシーン遷移しない．
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         // OnDestroyのタイミングでRemoveCallbacksすると，MainでPlayerOnLeftが呼ばれなくなる．
         // StartButtonOnClickでRemoveCallbacksすると，呼ばれてしまう．=>ホストしかコールバックを解除していないから．
-        Runner.RemoveCallbacks(this);
+        if (Runner != null)
+        {
+            Runner.RemoveCallbacks(this);
+        }
     }
     
     // -----------------INetworkRunnerCallbacks-------------------------
@@ -64,7 +67,7 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
         }
 
         // ホストかつ，部屋に2人以上いるなら，スタートボタンを押せるようにする．
-        if (runner.IsSharedModeMasterClient && runner.SessionInfo.PlayerCount >= 2)
+        if (runner.IsSharedModeMasterClient && runner.SessionInfo.PlayerCount >= 1)
         {
             _startButton.interactable = true;
         }

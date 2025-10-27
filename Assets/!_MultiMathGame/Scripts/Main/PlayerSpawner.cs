@@ -12,32 +12,31 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
     public override void Spawned()
     {
         Runner.AddCallbacks(this);
+        
+        var playerAvatar = Runner.Spawn(_playerPrefab, onBeforeSpawned: (_, playerObj) =>
+        {
+            PlayerController playerController = playerObj.GetComponent<PlayerController>();
+            playerController.PlayerName = PlayerInfoManager.PlayerName;
+            playerController.PlayerColor = PlayerInfoManager.PlayerColor;
+        });
+            
+        // 自分自身のプレイヤーオブジェクトを設定する．(他のプレイヤーが，簡単に他Playerを取得できるようになる)
+        Runner.SetPlayerObject(Runner.LocalPlayer, playerAvatar);
+        PlayerCountCheck();
     }
-    
+
+    private void PlayerCountCheck()
+    {
+        if (WaitRoom.JoinedPlayer == Runner.SessionInfo.PlayerCount)
+        {
+            _gameManager.RpcStartGame();
+        }
+    }
     
     
     // -----------------INetworkRunnerCallbacks-------------------------
     
-    void INetworkRunnerCallbacks.OnPlayerJoined(NetworkRunner runner, PlayerRef player)
-    {
-        // OnPlayerJoinedはプレイヤーが入室する度，全プレイヤーで実行されるため，自分自身だけがアバターをスポーンさせないといけない．
-        if (player == runner.LocalPlayer)
-        {
-            runner.Spawn(_playerPrefab, onBeforeSpawned: (_, playerObj) =>
-            {
-                PlayerController playerController = playerObj.GetComponent<PlayerController>();
-                playerController.PlayerName = PlayerInfoManager.PlayerName;
-                playerController.PlayerColor = PlayerInfoManager.PlayerColor;
-            });
-        }
-
-        // スタートボタンを押したときのプレイヤー全員のシーン遷移が終わったら，ゲーム開始！
-        if (Runner.SessionInfo.PlayerCount == WaitRoom.JoinedPlayer)
-        {
-            Debug.Log("ゲーム開始！！");
-            _gameManager._gameState = GameManager.GameState.Started;
-        }
-    }
+    void INetworkRunnerCallbacks.OnPlayerJoined(NetworkRunner runner, PlayerRef player) { }
 
     void INetworkRunnerCallbacks.OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
     

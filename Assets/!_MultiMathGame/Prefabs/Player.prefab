@@ -15,9 +15,9 @@ GameObject:
   - component: {fileID: 7870455193924119205}
   - component: {fileID: 6117976263807281707}
   - component: {fileID: 8850923393194883731}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -213,14 +213,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2cd466a7d6b844aaeb78d271888abd36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _PlayerHp: 10
+  _greenHpGauge: {fileID: 543619767294646196}
+  _PlayerName:
+    _length: 0
+    _data:
+      Data: 0000000000000000000000000000000000000000000000000000000000000000
+  _PlayerColor: {r: 0, g: 0, b: 0, a: 0}
   _moveSpeed: 4
   _jumpForce: 8
   _playerNameText: {fileID: 346321721738167367}
-  _playerColors:
-  - {r: 0, g: 0.35232806, b: 1, a: 1}
-  - {r: 0.8396226, g: 0, b: 0.75371104, a: 1}
-  - {r: 0.7830189, g: 0.7404929, b: 0, a: 1}
-  - {r: 0, g: 0.6886792, b: 0.5916823, a: 1}
+  IsShowingQuestion: 0
 --- !u!1 &3286323817672064419
 GameObject:
   m_ObjectHideFlags: 0

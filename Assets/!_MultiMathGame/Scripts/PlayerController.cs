@@ -1,12 +1,16 @@
 using Fusion;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 public class PlayerController : NetworkBehaviour
 {
+    private int _playerHp = 10;
+    private int _playerMaxHp;
+    [SerializeField] private Image _greenHpGauge;
     [Networked] public NetworkString<_8> PlayerName { get; set; }
     [Networked] public Color PlayerColor { get; set; }
-    
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _jumpForce;
     [SerializeField] private TextMeshPro _playerNameText;
@@ -15,9 +19,12 @@ public class PlayerController : NetworkBehaviour
     private const float _castRadius = 0.2f;
     private const float _castDistance = 0.5f;
 
+    public bool IsShowingQuestion = false;
+
     public override void Spawned()
     {
         _rigidbody = this.GetComponent<Rigidbody2D>();
+        _playerMaxHp = _playerHp;
         
         // プレイヤー名・色の更新
         _playerNameText.text = PlayerName.Value;
@@ -27,9 +34,15 @@ public class PlayerController : NetworkBehaviour
     // FixedUpdateNetworkだと，スペースキーが反応しないことがある．
     public override void Render()
     {
-        bool isTouchingGround = Physics2D.CircleCast(transform.position, _castRadius, Vector2.down, _castDistance, LayerMask.GetMask("Ground"));
+        if (IsShowingQuestion)
+        {
+            _rigidbody.linearVelocityX = 0f;
+            return;
+        }
         
         // 地面についている間だけジャンプ可能．
+        bool isTouchingGround = Physics2D.CircleCast(transform.position, _castRadius, Vector2.down, _castDistance, LayerMask.GetMask("Ground"));
+        
         if (Input.GetKeyDown(KeyCode.Space) && isTouchingGround)
         {
             _rigidbody.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
@@ -53,8 +66,17 @@ public class PlayerController : NetworkBehaviour
             return;
         }
     }
+
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RpcDamage()
+    {
+        _playerHp -= 4;
+        _greenHpGauge.fillAmount = _playerHp / (float)_playerMaxHp;
+    }
     
-    
+    /// <summary>
+    /// Unityエディター上に，CircleCastの範囲を表示する
+    /// </summary>
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;

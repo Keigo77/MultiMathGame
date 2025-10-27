@@ -11,10 +11,16 @@ public class GameManager : NetworkBehaviour
         Finished,
     }
     
-    public GameState _gameState = GameState.None;
+    [Networked] public GameState State { get; set; } = GameState.None;
 
     public void FixedUpdateNetwork()
     {
-        if (_gameState != GameState.Started) { return; }
+        if (State != GameState.Started) { return; }
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RpcStartGame()
+    {
+        State = GameState.Started;
     }
 }
