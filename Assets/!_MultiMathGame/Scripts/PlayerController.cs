@@ -12,8 +12,8 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private TextMeshPro _playerNameText;
     private Rigidbody2D _rigidbody;
     
-    private const float _castRadius = 0.2f; // 半径
-    private const float _castDistance = 0.5f; // 距離
+    private const float _castRadius = 0.2f;
+    private const float _castDistance = 0.5f;
 
     public override void Spawned()
     {

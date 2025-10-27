@@ -11,6 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/!_MultiMathGame/Scenes/WaitRoom.unity
     guid: bf83c4a1ff0f048f8825ceca422adc89
+  - enabled: 1
+    path: Assets/!_MultiMathGame/Scenes/Main.unity
+    guid: eb904bf45fbf24411995720bba4fa221
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

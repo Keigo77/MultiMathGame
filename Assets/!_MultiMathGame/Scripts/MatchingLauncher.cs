@@ -5,7 +5,7 @@ using Fusion.Sockets;
 using TMPro;
 using UnityEngine;
 
-public class GameLauncher : MonoBehaviour
+public class MatchingLauncher : MonoBehaviour
 {
     [SerializeField] private NetworkRunner _networkRunnerPrefab;
     [SerializeField] private TMP_InputField _roomNameInputField;
