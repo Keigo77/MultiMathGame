@@ -170,7 +170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _IsGameStarted:
     _value: 0
-  _resultText: {fileID: 0}
+  _resultText: {fileID: 1125267280}
 --- !u!4 &110270695
 Transform:
   m_ObjectHideFlags: 0
@@ -739,7 +739,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1125267279
 RectTransform:
   m_ObjectHideFlags: 0

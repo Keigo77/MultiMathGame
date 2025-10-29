@@ -15,17 +15,22 @@ public class DamagePoint : NetworkBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") && collision.gameObject.GetComponent<NetworkObject>().HasStateAuthority 
-                                           && TryGetComponent<PlayerController>(out var playerController))
+        if (collision.CompareTag("Player"))
         {
-            foreach (var player in Runner.ActivePlayers) {
-                if (player != Runner.LocalPlayer) {
-                    playerController.RpcDamage();
-                }
-            }
+            this.gameObject.SetActive(false);
         }
         
-        RpcDespawn();
+        if (collision.CompareTag("Player") && collision.gameObject.GetComponent<NetworkObject>().HasStateAuthority)
+        {
+            foreach (var player in Runner.ActivePlayers) {
+                if (Runner.TryGetPlayerObject(player, out var playerObj) && player != Runner.LocalPlayer)
+                {
+                    playerObj.GetComponent<PlayerController>().RpcDamage();
+                }
+            }
+            
+            RpcDespawn();
+        }
     }
 
     /// <summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
@@ -24,6 +25,23 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
         {
             _startButton.gameObject.SetActive(true);
         }
+        
+        // プレイヤーのスポーン
+        Runner.Spawn(_playerPrefab, onBeforeSpawned: (_, playerObj) =>
+        {
+            PlayerController playerController = playerObj.GetComponent<PlayerController>();
+            playerController.PlayerName = PlayerInfoManager.PlayerName;
+
+            // プレイヤーの色の更新．現在部屋にいるプレイヤーの数を取得し，入ってきた順番で色を決定する．(だが，このままでは数人が出入りすると，同じ色になる．)
+            playerController.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId];
+            
+            // Mainシーンでも同じ色を使いたいため，色を保存する．
+            PlayerInfoManager.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId];
+        });
+        
+        // プレイヤーの入室を許可する．
+        Runner.SessionInfo.IsOpen = true;
+        CheckCanStartGame();
     }
     
     public void StartButtonOnClick()
@@ -34,6 +52,12 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
         Runner.LoadScene("Main");
         // SceneManager.LoadScene("Main");だと押した人しかシーン遷移しない．
     }
+    
+    public void BackButtonOnClick()
+    {
+        Runner.Shutdown();
+        SceneManager.LoadScene("Home");
+    }
 
     private void OnDisable()
     {
@@ -42,35 +66,26 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
         if (Runner != null)
         {
             Runner.RemoveCallbacks(this);
+            Debug.Log("Remove Callbacks");
         }
     }
+
+    private void CheckCanStartGame()
+    {
+        // ホストかつ，部屋に2人以上いるなら，スタートボタンを押せるようにする．
+        if (Runner.IsSharedModeMasterClient && Runner.SessionInfo.PlayerCount >= 2)
+        {
+            _startButton.interactable = true;
+        }
+    }
+    
+    
     
     // -----------------INetworkRunnerCallbacks-------------------------
 
     void INetworkRunnerCallbacks.OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        // OnPlayerJoinedはプレイヤーが入室する度，全プレイヤーで実行されるため，自分自身だけがアバターをスポーンさせないといけない．
-        if (player == runner.LocalPlayer)
-        {
-            runner.Spawn(_playerPrefab, onBeforeSpawned: (_, playerObj) =>
-            {
-                PlayerController playerController = playerObj.GetComponent<PlayerController>();
-                playerController.PlayerName = PlayerInfoManager.PlayerName;
-                
-                // プレイヤーの色の更新．現在部屋にいるプレイヤーの数を取得し，入ってきた順番で色を決定する．
-                int nowPlayerCount = runner.SessionInfo.PlayerCount - 1;
-                playerController.PlayerColor = _playerColors[nowPlayerCount];
-                
-                // Mainシーンでも同じ色を使いたいため，色を保存する．
-                PlayerInfoManager.PlayerColor = _playerColors[nowPlayerCount];
-            });
-        }
-
-        // ホストかつ，部屋に2人以上いるなら，スタートボタンを押せるようにする．
-        if (runner.IsSharedModeMasterClient && runner.SessionInfo.PlayerCount >= 1)
-        {
-            _startButton.interactable = true;
-        }
+        CheckCanStartGame();
     }
 
     // ここでrunnerでなく，Runnerを使うと，Runnerはnullなのでエラーが出る

@@ -69,10 +69,11 @@ public class PlayerController : NetworkBehaviour
         _playerHp -= 4;
         _greenHpGauge.fillAmount = _playerHp / (float)_playerMaxHp;
 
-        if (_playerHp <= 0)
+        if (_playerHp <= 0 && HasStateAuthority)
         {
             _gameManager.RpcSendDeath(Runner.LocalPlayer);
             Runner.Despawn(_networkObject);
+            Debug.Log("despawn");
         }
     }
     
