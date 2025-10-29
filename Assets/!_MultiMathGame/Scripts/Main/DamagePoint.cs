@@ -17,19 +17,20 @@ public class DamagePoint : NetworkBehaviour
     {
         if (collision.CompareTag("Player"))
         {
+            // デスポーンまでに遅延があり，2回触れることもできるため，誰かが触れたら即座に非表示にする．
             this.gameObject.SetActive(false);
-        }
-        
-        if (collision.CompareTag("Player") && collision.gameObject.GetComponent<NetworkObject>().HasStateAuthority)
-        {
-            foreach (var player in Runner.ActivePlayers) {
-                if (Runner.TryGetPlayerObject(player, out var playerObj) && player != Runner.LocalPlayer)
-                {
-                    playerObj.GetComponent<PlayerController>().RpcDamage();
-                }
-            }
             
-            RpcDespawn();
+            if (collision.gameObject.GetComponent<NetworkObject>().HasStateAuthority)
+            {
+                foreach (var player in Runner.ActivePlayers) {
+                    if (Runner.TryGetPlayerObject(player, out var playerObj) && player != Runner.LocalPlayer)
+                    {
+                        playerObj.GetComponent<PlayerController>().RpcDamage();
+                    }
+                }
+            
+                RpcDespawn();
+            }
         }
     }
 

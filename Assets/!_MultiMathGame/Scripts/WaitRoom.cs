@@ -33,10 +33,10 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
             playerController.PlayerName = PlayerInfoManager.PlayerName;
 
             // プレイヤーの色の更新．現在部屋にいるプレイヤーの数を取得し，入ってきた順番で色を決定する．(だが，このままでは数人が出入りすると，同じ色になる．)
-            playerController.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId];
+            playerController.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId - 1];
             
             // Mainシーンでも同じ色を使いたいため，色を保存する．
-            PlayerInfoManager.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId];
+            PlayerInfoManager.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId - 1];
         });
         
         // プレイヤーの入室を許可する．
@@ -61,7 +61,7 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
 
     private void OnDisable()
     {
-        // OnDestroyのタイミングでRemoveCallbacksすると，MainでPlayerOnLeftが呼ばれなくなる．
+        // OnDisableのタイミングでRemoveCallbacksすると，MainでPlayerOnLeftが呼ばれなくなる．
         // StartButtonOnClickでRemoveCallbacksすると，呼ばれてしまう．=>ホストしかコールバックを解除していないから．
         if (Runner != null)
         {
