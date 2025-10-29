@@ -16,6 +16,7 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
         var playerAvatar = Runner.Spawn(_playerPrefab, onBeforeSpawned: (_, playerObj) =>
         {
             PlayerController playerController = playerObj.GetComponent<PlayerController>();
+            playerController.Init(_gameManager);
             playerController.PlayerName = PlayerInfoManager.PlayerName;
             playerController.PlayerColor = PlayerInfoManager.PlayerColor;
         });

@@ -20,10 +20,18 @@ public class PlayerController : NetworkBehaviour
     private const float _castDistance = 0.5f;
 
     public bool IsShowingQuestion = false;
+    private NetworkObject _networkObject;
+    private GameManager _gameManager;
+
+    public void Init(GameManager gameManager)
+    {
+        _gameManager = gameManager;
+    }
 
     public override void Spawned()
     {
         _rigidbody = this.GetComponent<Rigidbody2D>();
+        _networkObject = this.GetComponent<NetworkObject>();
         _playerMaxHp = _playerHp;
         
         // プレイヤー名・色の更新
@@ -60,11 +68,6 @@ public class PlayerController : NetworkBehaviour
         {
             _rigidbody.linearVelocityX = 0f;
         }
-        if (Runner == null)
-        {
-            Debug.Log("Runner is null");
-            return;
-        }
     }
 
     [Rpc(RpcSources.All, RpcTargets.All)]
@@ -72,6 +75,11 @@ public class PlayerController : NetworkBehaviour
     {
         _playerHp -= 4;
         _greenHpGauge.fillAmount = _playerHp / (float)_playerMaxHp;
+        if (_playerHp <= 0)
+        {
+            _gameManager.RpcDeath(Runner.LocalPlayer);
+            Runner.Despawn(_networkObject);
+        }
     }
     
     /// <summary>

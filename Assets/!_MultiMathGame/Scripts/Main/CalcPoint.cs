@@ -5,29 +5,30 @@ using UnityEngine.UI;
 
 public class CalcPoint : NetworkBehaviour
 {
-    // Generatorから受け取るもの
     [SerializeField] private GameObject _calcPanelObj;
     [SerializeField] private TextMeshProUGUI _questionText;
     [SerializeField] private TMP_InputField _answerInputField;
     
-    [Networked] private NetworkBool IsPlayerTouched { get; set; }= false;
-    private CircleCollider2D _circleCollider;
+    [Networked] private NetworkBool IsAnyPlayerTouched { get; set; }= false;
     private SpriteRenderer _spriteRenderer;
-    private int answer;
+    private int _answer;
     private PlayerController _playerController;
     private NetworkObject _networkObject;
+    private bool _isPushedDecideButton = false;
     
     public override void Spawned()
     {
-        _circleCollider = this.GetComponent<CircleCollider2D>();
         _spriteRenderer = this.GetComponent<SpriteRenderer>();
         _networkObject = this.GetComponent<NetworkObject>();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") && !IsPlayerTouched)
+        if (collision.CompareTag("Player") && !IsAnyPlayerTouched && collision.gameObject.GetComponent<NetworkObject>().HasStateAuthority)
         {
+            Debug.Log("問題");
+            
+            _spriteRenderer.enabled = false;
             // プレイヤーが動けないようにする．既に問題を解いている最中なら，何もしない．
             _playerController = collision.GetComponent<PlayerController>();
             if (_playerController.IsShowingQuestion)
@@ -35,17 +36,14 @@ public class CalcPoint : NetworkBehaviour
                 Runner.Despawn(_networkObject);
                 return;
             }
-            else
-            {
-                _playerController.IsShowingQuestion = true;
-            }
             
-            IsPlayerTouched = true;
+            _playerController.IsShowingQuestion = true;
+            IsAnyPlayerTouched = true;
             
             // 問題作成
             var question = new CreateQuestion();
             _questionText.text = $"{question.num1} + {question.num2} = ?";
-            answer = question.result;
+            _answer = question.result;
             
             _calcPanelObj.SetActive(true);
         }
@@ -53,12 +51,15 @@ public class CalcPoint : NetworkBehaviour
 
     public void DecideButtonOnClick()
     {
+        if (_isPushedDecideButton) { return; }
+        _isPushedDecideButton = true;
+        
         if (_playerController != null)
         {
             _playerController.IsShowingQuestion = false;
         }
         
-        if (int.TryParse(_answerInputField.text, out int playerAnswer) && playerAnswer == answer)
+        if (int.TryParse(_answerInputField.text, out int playerAnswer) && playerAnswer == _answer)
         {
             Correct();
             Debug.Log("正解");
@@ -68,8 +69,6 @@ public class CalcPoint : NetworkBehaviour
             InCorrect();
             Debug.Log("不正解");
         }
-        
-        _calcPanelObj.SetActive(false);
     }
 
     /// <summary>
@@ -79,12 +78,14 @@ public class CalcPoint : NetworkBehaviour
     {
         foreach (var player in Runner.ActivePlayers) {
             if (Runner.TryGetPlayerObject(player, out var playerObj) && player != Runner.LocalPlayer) {
-                var playerController = playerObj.GetComponent<PlayerController>();
-                playerController.RpcDamage();
+                if (playerObj.TryGetComponent<PlayerController>(out var playerController))
+                {
+                    playerController.RpcDamage();
+                }
             }
         }
         
-        Runner.Despawn(_networkObject);
+        RpcDespawn();
     }
 
     /// <summary>
@@ -94,11 +95,22 @@ public class CalcPoint : NetworkBehaviour
     {
         foreach (var player in Runner.ActivePlayers) {
             if (Runner.TryGetPlayerObject(player, out var playerObj) && player == Runner.LocalPlayer) {
-                var playerController = playerObj.GetComponent<PlayerController>();
-                playerController.RpcDamage();
+                if (playerObj.TryGetComponent<PlayerController>(out var playerController))
+                {
+                    playerController.RpcDamage();
+                }
             }
         }
         
+        RpcDespawn();
+    }
+
+    /// <summary>
+    /// ホストがスポーンさせている物なので，ホストしかデスポーンさせられない．
+    /// </summary>
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    private void RpcDespawn()
+    {
         Runner.Despawn(_networkObject);
     }
 }
