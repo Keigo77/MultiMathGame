@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CalcPointGenerator : NetworkBehaviour
+public class DamagePointGenerator : NetworkBehaviour
 {
     [SerializeField] private NetworkPrefabRef _calcPointPrefab;
     [SerializeField] private float _generateSpan;
@@ -22,7 +22,7 @@ public class CalcPointGenerator : NetworkBehaviour
         if (!HasStateAuthority) { return; }
         
         float elapsedTime = (Runner.Tick - StartTick) * Runner.DeltaTime;
-        if (elapsedTime >= _generateSpan && _gameManager.State == GameManager.GameState.Started)
+        if (elapsedTime >= _generateSpan && _gameManager.IsGameStarted)
         {
             // 経過時間のリセット．elapsedTime=0としても，Render内では実行されない．
             StartTick = Runner.Tick;

@@ -18,6 +18,7 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
             PlayerController playerController = playerObj.GetComponent<PlayerController>();
             playerController.PlayerName = PlayerInfoManager.PlayerName;
             playerController.PlayerColor = PlayerInfoManager.PlayerColor;
+            playerController.Init(_gameManager);
         });
             
         // 自分自身のプレイヤーオブジェクトを設定する．(他のプレイヤーが，簡単に他Playerを取得できるようになる)

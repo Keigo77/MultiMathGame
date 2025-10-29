@@ -15,14 +15,21 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private float _jumpForce;
     [SerializeField] private TextMeshPro _playerNameText;
     private Rigidbody2D _rigidbody;
+    private NetworkObject _networkObject;
+    private GameManager _gameManager;
     
-    private const float _castRadius = 0.2f;
-    private const float _castDistance = 0.5f;
+    private const float CASTRADIUS = 0.2f;
+    private const float CASTDISTANCE = 0.5f;
 
-    public bool IsShowingQuestion = false;
+
+    public void Init(GameManager gameManager)
+    {
+        _gameManager = gameManager;
+    }
 
     public override void Spawned()
     {
+        _networkObject = this.GetComponent<NetworkObject>();
         _rigidbody = this.GetComponent<Rigidbody2D>();
         _playerMaxHp = _playerHp;
         
@@ -34,14 +41,8 @@ public class PlayerController : NetworkBehaviour
     // FixedUpdateNetworkだと，スペースキーが反応しないことがある．
     public override void Render()
     {
-        if (IsShowingQuestion)
-        {
-            _rigidbody.linearVelocityX = 0f;
-            return;
-        }
-        
         // 地面についている間だけジャンプ可能．
-        bool isTouchingGround = Physics2D.CircleCast(transform.position, _castRadius, Vector2.down, _castDistance, LayerMask.GetMask("Ground"));
+        bool isTouchingGround = Physics2D.CircleCast(transform.position, CASTRADIUS, Vector2.down, CASTDISTANCE, LayerMask.GetMask("Ground"));
         
         if (Input.GetKeyDown(KeyCode.Space) && isTouchingGround)
         {
@@ -60,18 +61,19 @@ public class PlayerController : NetworkBehaviour
         {
             _rigidbody.linearVelocityX = 0f;
         }
-        if (Runner == null)
-        {
-            Debug.Log("Runner is null");
-            return;
-        }
     }
 
-    [Rpc(RpcSources.All, RpcTargets.All)]
+    [Rpc(RpcSources.Proxies, RpcTargets.All)]
     public void RpcDamage()
     {
         _playerHp -= 4;
         _greenHpGauge.fillAmount = _playerHp / (float)_playerMaxHp;
+
+        if (_playerHp <= 0)
+        {
+            _gameManager.RpcSendDeath(Runner.LocalPlayer);
+            Runner.Despawn(_networkObject);
+        }
     }
     
     /// <summary>
@@ -81,7 +83,7 @@ public class PlayerController : NetworkBehaviour
     {
         Gizmos.color = Color.yellow;
         Vector3 origin = transform.position;
-        Vector3 endPoint = origin + (Vector3)Vector2.down * _castDistance;
-        Gizmos.DrawWireSphere(endPoint, _castRadius);
+        Vector3 endPoint = origin + (Vector3)Vector2.down * CASTDISTANCE;
+        Gizmos.DrawWireSphere(endPoint, CASTRADIUS);
     }
 }
