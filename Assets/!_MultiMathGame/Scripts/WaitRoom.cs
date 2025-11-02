@@ -32,10 +32,10 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
             playerController.PlayerName = PlayerInfoManager.PlayerName;
 
             // プレイヤーの色の更新．現在部屋にいるプレイヤーの数を取得し，入ってきた順番で色を決定する．(だが，このままでは数人が出入りすると，同じ色になる．)
-            playerController.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId % 4 - 1];
+            playerController.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId % 4];
             
             // Mainシーンでも同じ色を使いたいため，色を保存する．
-            PlayerInfoManager.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId % 4 - 1];
+            PlayerInfoManager.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId % 4];
         });
         
         // プレイヤーの入室を許可する．
@@ -91,9 +91,14 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
     void INetworkRunnerCallbacks.OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"{player}が退室しました．");
-        if (runner.IsSharedModeMasterClient && runner.SessionInfo.PlayerCount < 2)
+        
+        // ホストが退室した場合に，新しいホストの画面でスタートボタンを表示する．
+        if (runner.IsSharedModeMasterClient)
         {
-            _startButton.interactable = false;
+            _startButton.gameObject.SetActive(true);
+            
+            // プレイヤーが2人以上いるなら，ボタンを押せるようにする．いないなら，押せないようにする．
+            _startButton.interactable = (runner.SessionInfo.PlayerCount >= 2) ? true : false;
         }
     }
     
