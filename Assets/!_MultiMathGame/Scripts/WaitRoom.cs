@@ -17,7 +17,6 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
     public override void Spawned()
     {
         // NetworkBehaviourを継承していれば，RunnerでNetworkRunnerにアクセス可能．
-        // ここでrunner = FindFirstObjectByType<NetworkRunner>();とすると，NullReferenceエラーが出る．
         Runner.AddCallbacks(this);
 
         // ホストなら，スタートボタンを表示する．
@@ -33,10 +32,10 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
             playerController.PlayerName = PlayerInfoManager.PlayerName;
 
             // プレイヤーの色の更新．現在部屋にいるプレイヤーの数を取得し，入ってきた順番で色を決定する．(だが，このままでは数人が出入りすると，同じ色になる．)
-            playerController.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId - 1];
+            playerController.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId % 4 - 1];
             
             // Mainシーンでも同じ色を使いたいため，色を保存する．
-            PlayerInfoManager.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId - 1];
+            PlayerInfoManager.PlayerColor = _playerColors[Runner.LocalPlayer.PlayerId % 4 - 1];
         });
         
         // プレイヤーの入室を許可する．
@@ -50,7 +49,7 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
         Runner.SessionInfo.IsOpen = false;
         JoinedPlayer = Runner.SessionInfo.PlayerCount;
         Runner.LoadScene("Main");
-        // SceneManager.LoadScene("Main");だと押した人しかシーン遷移しない．
+        // SceneManager.LoadScene("Main");だと，押した人しかシーン遷移しなかつ，遷移先のネットワークオブジェクトがスポーンされない．．
     }
     
     public void BackButtonOnClick()
@@ -91,7 +90,7 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
     // ここでrunnerでなく，Runnerを使うと，Runnerはnullなのでエラーが出る
     void INetworkRunnerCallbacks.OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log(player);
+        Debug.Log($"{player}が退室しました．");
         if (runner.IsSharedModeMasterClient && runner.SessionInfo.PlayerCount < 2)
         {
             _startButton.interactable = false;

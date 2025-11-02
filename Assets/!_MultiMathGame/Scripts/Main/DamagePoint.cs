@@ -1,11 +1,8 @@
 using Fusion;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class DamagePoint : NetworkBehaviour
 {
-    private PlayerController _playerController;
     private NetworkObject _networkObject;
     
     public override void Spawned()
