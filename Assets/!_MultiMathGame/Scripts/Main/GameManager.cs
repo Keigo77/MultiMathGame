@@ -33,7 +33,7 @@ public class GameManager : NetworkBehaviour, INetworkRunnerCallbacks
     {
         _deathPlayers.Add(deathPlayer);
         
-        if (_deathPlayers.Count == Runner.SessionInfo.PlayerCount - 1)
+        if (_deathPlayers.Count == WaitRoom.JoinedPlayer - 1)
         {
             if (_deathPlayers.Contains(Runner.LocalPlayer))
             {
@@ -58,9 +58,12 @@ public class GameManager : NetworkBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    private void Disbled()
+    private void OnDisable()
     {
-        Runner.RemoveCallbacks(this);
+        if (Runner != null)
+        {
+            Runner.RemoveCallbacks(this);
+        }
     }
 
     // -----------------INetworkRunnerCallbacks-------------------------
@@ -69,12 +72,7 @@ public class GameManager : NetworkBehaviour, INetworkRunnerCallbacks
 
     void INetworkRunnerCallbacks.OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        if (runner.SessionInfo.PlayerCount == 1)
-        {
-            _resultText.text = "You Win!";
-            _resultText.gameObject.SetActive(true);
-            MoveWaitRoom().Forget();
-        }
+        RpcSendDeath(player);
     }
 
     void INetworkRunnerCallbacks.OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) {}

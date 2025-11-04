@@ -47,7 +47,6 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
     {
         // IsOpenをfalseにしてからMainに行かないと，プレイ中にMainシーンに人が入って来れるようになる．
         Runner.SessionInfo.IsOpen = false;
-        JoinedPlayer = Runner.SessionInfo.PlayerCount;
         Runner.LoadScene("Main");
         // SceneManager.LoadScene("Main");だと，押した人しかシーン遷移しなかつ，遷移先のネットワークオブジェクトがスポーンされない．．
     }
@@ -64,6 +63,7 @@ public class WaitRoom : NetworkBehaviour, INetworkRunnerCallbacks
         // StartButtonOnClickでRemoveCallbacksすると，呼ばれてしまう．=>ホストしかコールバックを解除していないから．
         if (Runner != null)
         {
+            JoinedPlayer = Runner.SessionInfo.PlayerCount;
             Runner.RemoveCallbacks(this);
             Debug.Log("Remove Callbacks");
         }
