@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Fusion;
+using Fusion.Sockets;
 using TMPro;
 using UnityEngine;
 
-public class GameManager : NetworkBehaviour
+public class GameManager : NetworkBehaviour, INetworkRunnerCallbacks
 {
     [Networked] public NetworkBool IsGameStarted { get; private set; } = false;
     [SerializeField] private TextMeshProUGUI _resultText;
@@ -17,6 +18,7 @@ public class GameManager : NetworkBehaviour
 
     public override void Spawned()
     {
+        Runner.AddCallbacks(this);
         _token = this.GetCancellationTokenOnDestroy();
     }
 
@@ -55,4 +57,41 @@ public class GameManager : NetworkBehaviour
             Runner.LoadScene("WaitRoom");
         }
     }
+
+    private void Disbled()
+    {
+        Runner.RemoveCallbacks(this);
+    }
+
+    // -----------------INetworkRunnerCallbacks-------------------------
+
+    void INetworkRunnerCallbacks.OnPlayerJoined(NetworkRunner runner, PlayerRef player) {}
+
+    void INetworkRunnerCallbacks.OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        if (runner.SessionInfo.PlayerCount == 1)
+        {
+            _resultText.text = "You Win!";
+            _resultText.gameObject.SetActive(true);
+            MoveWaitRoom().Forget();
+        }
+    }
+
+    void INetworkRunnerCallbacks.OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) {}
+    void INetworkRunnerCallbacks.OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) {}
+    void INetworkRunnerCallbacks.OnInput(NetworkRunner runner, NetworkInput input) {}
+    void INetworkRunnerCallbacks.OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) {}
+    void INetworkRunnerCallbacks.OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) {}
+    void INetworkRunnerCallbacks.OnConnectedToServer(NetworkRunner runner) {}
+    void INetworkRunnerCallbacks.OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) {}
+    void INetworkRunnerCallbacks.OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) {}
+    void INetworkRunnerCallbacks.OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) {}
+    void INetworkRunnerCallbacks.OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) {}
+    void INetworkRunnerCallbacks.OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) {}
+    void INetworkRunnerCallbacks.OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) {}
+    void INetworkRunnerCallbacks.OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) {}
+    void INetworkRunnerCallbacks.OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) {}
+    void INetworkRunnerCallbacks.OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) {}
+    void INetworkRunnerCallbacks.OnSceneLoadDone(NetworkRunner runner) {}
+    void INetworkRunnerCallbacks.OnSceneLoadStart(NetworkRunner runner) {}
 }
